@@ -1,0 +1,63 @@
+// Prisma schema — defines how submitted SIR form data is stored.
+// Postgres (works with Vercel Postgres, Neon, Supabase, etc.)
+// Files are stored as base64 text directly in the DB — Vercel's
+// filesystem is not persistent, so we never write uploads to disk.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Submission {
+  id                     String   @id @default(cuid())
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  status                 String   @default("draft") // draft | submitted
+
+  // Passport photo — stored as base64 data URL
+  photoData              String?  @db.Text
+
+  // Voter identity
+  voterName              String?
+  epicNumber             String?
+  dob                    String?
+  aadhaarNumber          String?
+  mobileNumber           String?
+
+  // Address & constituency
+  address                String?  @db.Text
+  district               String?
+  state                  String?
+  assemblyConstituency   String?
+  partNumber             String?
+
+  // Family details
+  fatherName             String?
+  fatherEpic             String?
+  motherName             String?
+  motherEpic             String?
+  spouseName             String?
+  spouseEpic             String?
+
+  // Which fields were auto-extracted vs manually entered — stored as JSON string
+  fieldSource            String?  @db.Text // JSON: { "voterName": "auto" | "manual", ... }
+
+  // Uploaded source documents kept for audit trail
+  documents              Document[]
+}
+
+model Document {
+  id           String     @id @default(cuid())
+  createdAt    DateTime   @default(now())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  docType      String     // e.g. self_voter_id, aadhaar, father_voter_id, mother_voter_id, spouse_voter_id, other, combined_pdf
+  fileName     String
+  mimeType     String?
+  fileData     String     @db.Text // base64
+}
+
