@@ -1,12 +1,5 @@
 import { prisma } from "../../lib/prisma";
 
-// Default Next.js API body limit is 1mb — photo + multiple ID documents as
-// base64 easily cross that, causing a non-JSON "Body exceeded 1mb limit"
-// response that the frontend's res.json() then fails to parse. Raise it.
-export const config = {
-  api: { bodyParser: { sizeLimit: "25mb" } },
-};
-
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -35,10 +28,6 @@ export default async function handler(req, res) {
         motherEpic: form.motherEpic || null,
         spouseName: form.spouseName || null,
         spouseEpic: form.spouseEpic || null,
-        paternalGrandfatherName: form.paternalGrandfatherName || null,
-        paternalGrandmotherName: form.paternalGrandmotherName || null,
-        maternalGrandfatherName: form.maternalGrandfatherName || null,
-        maternalGrandmotherName: form.maternalGrandmotherName || null,
         fieldSource: JSON.stringify(fieldSource || {}),
         documents: {
           create: (documents || []).map((d) => ({
