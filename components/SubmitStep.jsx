@@ -29,7 +29,16 @@ export default function SubmitStep({ form, source, photo, documents, onBack, onR
           status: "submitted",
         }),
       });
-      const data = await res.json();
+      let data;
+      try {
+        data = await res.json();
+      } catch (parseErr) {
+        throw new Error(
+          res.status === 413
+            ? "Uploaded documents/photo खूप मोठे आहेत (एकूण 4MB पेक्षा जास्त). कमी size च्या files वापरून पुन्हा प्रयत्न करा."
+            : "Server कडून अनपेक्षित response आला (status " + res.status + ")."
+        );
+      }
       if (!res.ok) throw new Error(data.error || "Save fail zale");
       setSubmittedId(data.id);
     } catch (e) {

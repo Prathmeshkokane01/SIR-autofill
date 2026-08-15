@@ -1,5 +1,12 @@
 import { prisma } from "../../lib/prisma";
 
+// Default Next.js body limit is 1MB — base64 documents/photo easily exceed
+// that. Vercel's serverless functions cap request bodies at ~4.5MB
+// regardless of this setting, so keep combined uploads under that.
+export const config = {
+  api: { bodyParser: { sizeLimit: "4mb" } },
+};
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -28,6 +35,10 @@ export default async function handler(req, res) {
         motherEpic: form.motherEpic || null,
         spouseName: form.spouseName || null,
         spouseEpic: form.spouseEpic || null,
+        paternalGrandfatherName: form.paternalGrandfatherName || null,
+        paternalGrandmotherName: form.paternalGrandmotherName || null,
+        maternalGrandfatherName: form.maternalGrandfatherName || null,
+        maternalGrandmotherName: form.maternalGrandmotherName || null,
         fieldSource: JSON.stringify(fieldSource || {}),
         documents: {
           create: (documents || []).map((d) => ({

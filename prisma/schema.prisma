@@ -43,6 +43,12 @@ model Submission {
   spouseName             String?
   spouseEpic             String?
 
+  // Grandparents' details
+  paternalGrandfatherName String?
+  paternalGrandmotherName String?
+  maternalGrandfatherName String?
+  maternalGrandmotherName String?
+
   // Which fields were auto-extracted vs manually entered — stored as JSON string
   fieldSource            String?  @db.Text // JSON: { "voterName": "auto" | "manual", ... }
 

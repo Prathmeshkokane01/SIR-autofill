@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Upload, FileText, X, ChevronRight, AlertCircle, Loader2 } from "lucide-react";
 import { DOCUMENT_TYPES, COMBINED_PDF_TYPE, loc } from "../lib/documentTypes";
 import { useLang } from "./LangContext";
+import { compressImage } from "../lib/compressImage";
 
 export default function DocumentUploadStep({ docs, setDocs, onExtracted, extracting, setExtracting }) {
   const { t, lang } = useLang();
@@ -12,20 +13,25 @@ export default function DocumentUploadStep({ docs, setDocs, onExtracted, extract
 
   const isAllowed = (file) => file.type.startsWith("image/") || file.type === "application/pdf";
 
-  const addFiles = (fileList, forcedType) => {
+  const addFiles = async (fileList, forcedType) => {
     const files = Array.from(fileList).filter(isAllowed);
     if (files.length === 0) {
       setError(t("fileTypeError"));
       return;
     }
     setError("");
-    const withMeta = files.map((f) => ({
-      file: f,
-      docType: forcedType || pendingType,
-      name: f.name,
-      isPdf: f.type === "application/pdf",
-      preview: f.type.startsWith("image/") ? URL.createObjectURL(f) : null,
-    }));
+    const withMeta = await Promise.all(
+      files.map(async (f) => {
+        const finalFile = f.type.startsWith("image/") ? await compressImage(f, { maxDimension: 1600, quality: 0.75 }) : f;
+        return {
+          file: finalFile,
+          docType: forcedType || pendingType,
+          name: f.name,
+          isPdf: f.type === "application/pdf",
+          preview: finalFile.type.startsWith("image/") ? URL.createObjectURL(finalFile) : null,
+        };
+      })
+    );
     setDocs((d) => [...d, ...withMeta]);
   };
 

@@ -72,6 +72,10 @@ export default async function handler(req, res) {
     motherEpic: submission.motherEpic,
     spouseName: submission.spouseName,
     spouseEpic: submission.spouseEpic,
+    paternalGrandfatherName: submission.paternalGrandfatherName,
+    paternalGrandmotherName: submission.paternalGrandmotherName,
+    maternalGrandfatherName: submission.maternalGrandfatherName,
+    maternalGrandmotherName: submission.maternalGrandmotherName,
   };
 
   FIELD_GROUPS.forEach((group) => {

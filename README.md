@@ -34,6 +34,17 @@ DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"
 npx prisma migrate dev --name init
 ```
 
+> ⚠️ **schema.prisma मध्ये पुढेमागे बदल केलास (नवीन fields जोडलेस) तर प्रत्येक वेळी हा command परत चालवावा लागतो:**
+> ```bash
+> npx prisma migrate dev --name <describe-the-change>
+> ```
+> उदा. `npx prisma migrate dev --name add_grandparents_fields`
+> Production (Vercel/Neon) च्या DB वर हाच बदल पाठवायला:
+> ```bash
+> npx prisma migrate deploy
+> ```
+> (हे production चा `DATABASE_URL` वापरून चालवावं लागतं — local `.env` मध्ये temporarily production URL टाकून चालव, मग परत local URL ने बदल.)
+
 ### Step 5 — Run
 ```bash
 npm run dev

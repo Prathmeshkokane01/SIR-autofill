@@ -1,20 +1,22 @@
 import { useRef, useState } from "react";
 import { ImagePlus, ChevronRight, AlertCircle } from "lucide-react";
 import { useLang } from "./LangContext";
+import { compressImage } from "../lib/compressImage";
 
 export default function PhotoUploadStep({ photo, setPhoto, onNext }) {
   const { t } = useLang();
   const [error, setError] = useState("");
   const inputRef = useRef(null);
 
-  const handlePick = (file) => {
+  const handlePick = async (file) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       setError(t("photoErrorType"));
       return;
     }
     setError("");
-    setPhoto({ file, preview: URL.createObjectURL(file) });
+    const compressed = await compressImage(file, { maxDimension: 800, quality: 0.8 });
+    setPhoto({ file: compressed, preview: URL.createObjectURL(compressed) });
   };
 
   return (
