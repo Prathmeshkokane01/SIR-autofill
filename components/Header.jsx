@@ -23,9 +23,9 @@ export default function Header({ step }) {
         <div style={{ flex: 1, background: "#138808" }} />
       </div>
 
-      <div style={{ background: "var(--navy)", color: "#F4F6F5", padding: "20px 24px 22px" }}>
+        <div style={{ background: "var(--navy)", color: "#F4F6F5", padding: "20px 24px 22px" }}> 
         <div style={{ maxWidth: 760, margin: "0 auto" }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "center", gap: 12, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div
                 style={{
@@ -78,7 +78,7 @@ export default function Header({ step }) {
           </div>
 
           {step > 0 && (
-          <div style={{ display: "flex", gap: 10, marginTop: 20, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 10, marginTop: 20, alignItems: "center", flexWrap: "wrap", justifyContent: "center", }}>
             {STEPS.map((s, i) => (
               <div key={s.n} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
