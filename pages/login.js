@@ -25,7 +25,7 @@ export default function Login() {
     if (res?.error) {
       setError(t("invalidLoginError"));
     } else {
-      router.push("/");
+      window.location.href = "/";
     }
   };
 
@@ -34,6 +34,7 @@ export default function Login() {
       <Head><title>Login — गणना प्रपत्र</title></Head>
       <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", height: 4 }}>
+    
           <div style={{ flex: 1, background: "#FF9933" }} />
           <div style={{ flex: 1, background: "#F4F6F5" }} />
           <div style={{ flex: 1, background: "#138808" }} />

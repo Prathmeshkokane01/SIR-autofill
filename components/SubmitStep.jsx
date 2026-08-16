@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { signOut } from "next-auth/react";
 import { Stamp, Loader2, Download } from "lucide-react";
 import { FIELD_GROUPS, ALL_FIELD_KEYS, loc } from "../lib/documentTypes";
 import { useLang } from "./LangContext";
@@ -43,6 +44,9 @@ export default function SubmitStep({ form, source, photo, documents, onBack, onR
       setSubmittedId(data.id);
     } catch (e) {
       setError(e.message);
+      if (e.message.includes("session expire")) {
+        setTimeout(() => signOut({ callbackUrl: "/login" }), 2000);
+      }
     } finally {
       setSaving(false);
     }

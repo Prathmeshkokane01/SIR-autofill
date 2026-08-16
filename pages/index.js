@@ -86,23 +86,25 @@ export default function Home() {
       ) : (
         <>
           <Header step={step} />
-          <div style={{ maxWidth: 820, margin: "0 auto", padding: "24px 20px 60px" }}>
-            {step === 1 && <PhotoUploadStep photo={photo} setPhoto={setPhoto} onNext={goToDocuments} />}
-            {step === 2 && (
-              <DocumentUploadStep
-                docs={docs}
-                setDocs={setDocs}
-                onExtracted={handleExtracted}
-                extracting={extracting}
-                setExtracting={setExtracting}
-              />
-            )}
-            {step === 3 && (
-              <VerifyStep form={form} setForm={setForm} source={source} setSource={setSource} onBack={() => setStep(2)} onNext={() => setStep(4)} />
-            )}
-            {step === 4 && (
-              <SubmitStep form={form} source={source} photo={photo} documents={savedDocuments} onBack={() => setStep(3)} onReset={resetAll} />
-            )}
+          <div style={{ maxWidth: 760, margin: "0 auto", padding: "32px 20px 60px", display: "flex", justifyContent: "center" }}>
+            <div className="panel" style={{ padding: "30px 32px", width: "100%", borderTop: "3px solid var(--navy)" }}>
+              {step === 1 && <PhotoUploadStep photo={photo} setPhoto={setPhoto} onNext={goToDocuments} />}
+              {step === 2 && (
+                <DocumentUploadStep
+                  docs={docs}
+                  setDocs={setDocs}
+                  onExtracted={handleExtracted}
+                  extracting={extracting}
+                  setExtracting={setExtracting}
+                />
+              )}
+              {step === 3 && (
+                <VerifyStep form={form} setForm={setForm} source={source} setSource={setSource} onBack={() => setStep(2)} onNext={() => setStep(4)} />
+              )}
+              {step === 4 && (
+                <SubmitStep form={form} source={source} photo={photo} documents={savedDocuments} onBack={() => setStep(3)} onReset={resetAll} />
+              )}
+            </div>
           </div>
         </>
       )}

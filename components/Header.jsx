@@ -1,5 +1,6 @@
-import { ScanLine, CheckCircle2, LogOut } from "lucide-react";
+import { ScanLine, CheckCircle2, LogOut, FileClock } from "lucide-react";
 import { useSession, signOut } from "next-auth/react";
+import Link from "next/link";
 import { useLang } from "./LangContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 
@@ -23,7 +24,7 @@ export default function Header({ step }) {
       </div>
 
       <div style={{ background: "var(--navy)", color: "#F4F6F5", padding: "20px 24px 22px" }}>
-        <div style={{ maxWidth: 820, margin: "0 auto" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div
@@ -48,7 +49,15 @@ export default function Header({ step }) {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <LanguageSwitcher />
               {session?.user && (
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <>
+                  <Link
+                    href="/submissions"
+                    title={t("mySubmissionsLink")}
+                    style={{ background: "rgba(255,255,255,0.12)", borderRadius: 6, padding: "6px 10px", color: "#F4F6F5", display: "flex", alignItems: "center", gap: 6, fontSize: 12, textDecoration: "none" }}
+                  >
+                    <FileClock size={14} /> {t("mySubmissionsLink")}
+                  </Link>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   {session.user.image && (
                     <img src={session.user.image} alt={session.user.name || "user"} style={{ width: 26, height: 26, borderRadius: "50%" }} />
                   )}
@@ -62,11 +71,13 @@ export default function Header({ step }) {
                   >
                     <LogOut size={14} />
                   </button>
-                </div>
+                  </div>
+                </>
               )}
             </div>
           </div>
 
+          {step > 0 && (
           <div style={{ display: "flex", gap: 10, marginTop: 20, alignItems: "center", flexWrap: "wrap" }}>
             {STEPS.map((s, i) => (
               <div key={s.n} style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -90,6 +101,7 @@ export default function Header({ step }) {
               </div>
             ))}
           </div>
+          )}
         </div>
       </div>
     </div>

@@ -32,7 +32,7 @@ export default function Signup() {
 
       const signinRes = await signIn("credentials", { redirect: false, email, password });
       if (signinRes?.error) throw new Error(t("invalidLoginError"));
-      router.push("/");
+      window.location.href = "/";
     } catch (e) {
       setError(e.message);
     } finally {

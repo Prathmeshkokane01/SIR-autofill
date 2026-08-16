@@ -19,6 +19,16 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Login karणे आवश्यक आहे." });
   }
 
+  // JWT sessions can outlive the actual User row (e.g. if the database was
+  // reset while a browser still held an old login cookie). Catching that
+  // here gives a clear, actionable message instead of a raw FK error.
+  const userExists = await prisma.user.findUnique({ where: { id: session.user.id } });
+  if (!userExists) {
+    return res.status(401).json({
+      error: "Tumcha session expire zala aahe (account sapadle nahi). Kripaya logout karun punha login kara.",
+    });
+  }
+
   try {
     const { form, fieldSource, photoData, documents, status } = req.body;
 

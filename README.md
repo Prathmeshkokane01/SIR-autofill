@@ -170,6 +170,8 @@ sir-autofill/
 
 ## लक्षात ठेव
 
+- **"Timed out fetching a new connection from the connection pool" error आली तर:** एकाच वेळी अनेक `npm run dev` किंवा `npx prisma studio` processes चालू असतील तर Neon चा connection limit संपतो. सगळे जुने terminals/processes बंद करून फक्त एकच `npm run dev` चालव. `lib/prisma.js` आता connection pool आपोआप मर्यादित (5) करतो, त्यामुळे हे सहसा होणार नाही.
+
 - Uploaded documents आणि photo **base64 म्हणून थेट database मध्ये** save होतात — Vercel च्या serverless environment मध्ये disk persistent नसतो म्हणून
 - हे tool फक्त तुमचा वेळ वाचवण्यासाठी draft भरतं — प्रत्यक्ष ECI/SIR पोर्टलवर submit करण्यापूर्वी सर्व माहिती अधिकृत फॉर्मशी manually जुळवून बघ
 - Production साठी: auth (login) आणि document encryption जोडायचा विचार कर, कारण ID proofs sensitive असतात
