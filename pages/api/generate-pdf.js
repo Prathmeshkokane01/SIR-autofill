@@ -29,11 +29,12 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: "Ha submission tumcha nahi." });
   }
 
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename="SIR-form-${id}.pdf"`);
+  try {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="SIR-form-${id}.pdf"`);
 
-  const doc = new PDFDocument({ size: "A4", margin: 40 });
-  doc.pipe(res);
+    const doc = new PDFDocument({ size: "A4", margin: 40 });
+    doc.pipe(res);
 
   // Devanagari-capable font (also covers Latin script) — one font used
   // throughout so Marathi/Hindi + English/numbers all render correctly.
@@ -120,4 +121,12 @@ export default async function handler(req, res) {
   doc.fillColor(GREEN).fontSize(8.5).text("Verified in Auto-Fill Assistant", 40, doc.y + 8);
 
   doc.end();
+  } catch (err) {
+    console.error("PDF generation error:", err);
+    if (!res.headersSent) {
+      res.status(500).json({ error: "PDF tayar karta ale nahi: " + err.message });
+    } else {
+      res.end();
+    }
+  }
 }
