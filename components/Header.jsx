@@ -1,9 +1,11 @@
-import { ScanLine, CheckCircle2 } from "lucide-react";
+import { ScanLine, CheckCircle2, LogOut } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import { useLang } from "./LangContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 
 export default function Header({ step }) {
   const { t } = useLang();
+  const { data: session } = useSession();
   const STEPS = [
     { n: 1, key: "stepPhoto" },
     { n: 2, key: "stepDocs" },
@@ -42,7 +44,27 @@ export default function Header({ step }) {
                 </div>
               </div>
             </div>
-            <LanguageSwitcher />
+
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <LanguageSwitcher />
+              {session?.user && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {session.user.image && (
+                    <img src={session.user.image} alt={session.user.name || "user"} style={{ width: 26, height: 26, borderRadius: "50%" }} />
+                  )}
+                  <span style={{ fontSize: 12, maxWidth: 100, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {session.user.name}
+                  </span>
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/login" })}
+                    title="Sign out"
+                    style={{ background: "rgba(255,255,255,0.12)", border: "none", borderRadius: 6, padding: 6, cursor: "pointer", color: "#F4F6F5", display: "flex" }}
+                  >
+                    <LogOut size={14} />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div style={{ display: "flex", gap: 10, marginTop: 20, alignItems: "center", flexWrap: "wrap" }}>

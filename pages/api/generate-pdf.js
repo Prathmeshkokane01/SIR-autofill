@@ -1,5 +1,7 @@
 import PDFDocument from "pdfkit";
 import path from "path";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "./auth/[...nextauth]";
 import { prisma } from "../../lib/prisma";
 import { FIELD_GROUPS, loc } from "../../lib/documentTypes";
 
@@ -18,8 +20,14 @@ export default async function handler(req, res) {
   const { id } = req.query;
   if (!id) return res.status(400).json({ error: "Submission id lagto." });
 
+  const session = await getServerSession(req, res, authOptions);
+  if (!session) return res.status(401).json({ error: "Login karणे आवश्यक आहे." });
+
   const submission = await prisma.submission.findUnique({ where: { id } });
   if (!submission) return res.status(404).json({ error: "Submission sapadle nahi." });
+  if (submission.userId !== session.user.id) {
+    return res.status(403).json({ error: "Ha submission tumcha nahi." });
+  }
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", `attachment; filename="SIR-form-${id}.pdf"`);

@@ -1,6 +1,8 @@
 import formidable from "formidable";
 import fs from "fs";
 import os from "os";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "./auth/[...nextauth]";
 import { extractFieldsFromDocuments } from "../../lib/gemini";
 
 export const config = {
@@ -10,6 +12,11 @@ export const config = {
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const session = await getServerSession(req, res, authOptions);
+  if (!session) {
+    return res.status(401).json({ error: "Login karणे आवश्यक आहे." });
   }
 
   // Use OS temp dir — safe on Vercel's read-only filesystem (only /tmp is writable there)

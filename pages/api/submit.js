@@ -1,3 +1,5 @@
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "./auth/[...nextauth]";
 import { prisma } from "../../lib/prisma";
 
 // Default Next.js body limit is 1MB — base64 documents/photo easily exceed
@@ -12,12 +14,18 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
+  const session = await getServerSession(req, res, authOptions);
+  if (!session) {
+    return res.status(401).json({ error: "Login karणे आवश्यक आहे." });
+  }
+
   try {
     const { form, fieldSource, photoData, documents, status } = req.body;
 
     const submission = await prisma.submission.create({
       data: {
         status: status || "submitted",
+        userId: session.user.id,
         photoData: photoData || null,
         voterName: form.voterName || null,
         epicNumber: form.epicNumber || null,

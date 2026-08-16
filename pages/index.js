@@ -1,5 +1,8 @@
 import { useState } from "react";
 import Head from "next/head";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import Header from "../components/Header";
 import PhotoUploadStep from "../components/PhotoUploadStep";
 import DocumentUploadStep from "../components/DocumentUploadStep";
@@ -14,6 +17,13 @@ function emptyForm() {
 }
 
 export default function Home() {
+  const { status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") router.replace("/login");
+  }, [status, router]);
+
   const [step, setStep] = useState(1);
   const [photo, setPhoto] = useState(null); // { file, preview, photoData }
   const [docs, setDocs] = useState([]);
@@ -69,25 +79,33 @@ export default function Home() {
       <Head>
         <title>गणना प्रपत्र — Auto-Fill Assistant</title>
       </Head>
-      <Header step={step} />
-      <div style={{ maxWidth: 820, margin: "0 auto", padding: "24px 20px 60px" }}>
-        {step === 1 && <PhotoUploadStep photo={photo} setPhoto={setPhoto} onNext={goToDocuments} />}
-        {step === 2 && (
-          <DocumentUploadStep
-            docs={docs}
-            setDocs={setDocs}
-            onExtracted={handleExtracted}
-            extracting={extracting}
-            setExtracting={setExtracting}
-          />
-        )}
-        {step === 3 && (
-          <VerifyStep form={form} setForm={setForm} source={source} setSource={setSource} onBack={() => setStep(2)} onNext={() => setStep(4)} />
-        )}
-        {step === 4 && (
-          <SubmitStep form={form} source={source} photo={photo} documents={savedDocuments} onBack={() => setStep(3)} onReset={resetAll} />
-        )}
-      </div>
+      {status === "loading" || status === "unauthenticated" ? (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "60vh", color: "var(--muted)", fontSize: 13 }}>
+          Loading...
+        </div>
+      ) : (
+        <>
+          <Header step={step} />
+          <div style={{ maxWidth: 820, margin: "0 auto", padding: "24px 20px 60px" }}>
+            {step === 1 && <PhotoUploadStep photo={photo} setPhoto={setPhoto} onNext={goToDocuments} />}
+            {step === 2 && (
+              <DocumentUploadStep
+                docs={docs}
+                setDocs={setDocs}
+                onExtracted={handleExtracted}
+                extracting={extracting}
+                setExtracting={setExtracting}
+              />
+            )}
+            {step === 3 && (
+              <VerifyStep form={form} setForm={setForm} source={source} setSource={setSource} onBack={() => setStep(2)} onNext={() => setStep(4)} />
+            )}
+            {step === 4 && (
+              <SubmitStep form={form} source={source} photo={photo} documents={savedDocuments} onBack={() => setStep(3)} onReset={resetAll} />
+            )}
+          </div>
+        </>
+      )}
     </>
   );
 }

@@ -12,11 +12,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           String       @id @default(cuid())
+  createdAt    DateTime     @default(now())
+  name         String
+  email        String       @unique
+  passwordHash String
+  submissions  Submission[]
+}
+
 model Submission {
   id                     String   @id @default(cuid())
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
   status                 String   @default("draft") // draft | submitted
+
+  // Who submitted this — used to show each user only their own records
+  userId                 String?
+  user                   User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   // Passport photo — stored as base64 data URL
   photoData              String?  @db.Text
