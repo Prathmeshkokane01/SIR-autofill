@@ -1,68 +1,49 @@
-# SIR गणना प्रपत्र — Auto-Fill Assistant
+# SIR Enumeration Form — Auto-Fill Assistant
 
-Voter ID / Aadhaar / जुने कागदपत्रे upload करून SIR Enumeration Form auto-extract + auto-fill करणारं full-stack app.
-**Next.js + Google Gemini API (extraction) + Postgres (database) + PDF export**
-भाषा: **मराठी / हिंदी / English** (वरच्या उजव्या कोपऱ्यात switch करता येतो)
+A full-stack app that lets you upload Voter ID / Aadhaar / other old documents, automatically extracts the required fields with AI, and auto-fills the SIR (Special Intensive Revision) Enumeration Form. You review/edit the extracted data, save it, and download a filled PDF.
+
+**Stack:** Next.js · Google Gemini API (extraction) · PostgreSQL + Prisma (database) · NextAuth.js (login) · PDFKit (PDF export)
+**Languages:** Marathi / Hindi / English (switch from the top-right corner)
 
 ---
 
-## Local development (VS Code)
+## Local Development (VS Code)
 
 ### Step 1 — Prerequisites
 - [Node.js](https://nodejs.org) v18+
-- Gemini API key: https://aistudio.google.com/apikey (free, credit card लागत नाही)
-- Postgres database — सर्वात सोपा free पर्याय: [Neon](https://neon.tech) (sign up → naveen project → connection string copy) किंवा Vercel Postgres (खाली बघा)
+- A Gemini API key — https://aistudio.google.com/apikey (free, no credit card required)
+- A Postgres database — easiest free option: [Neon](https://neon.tech) (sign up → new project → copy the connection string). Vercel Postgres also works (see the deployment section below).
 
-### Step 2 — Install
+### Step 2 — Install dependencies
 ```bash
 cd sir-autofill
 npm install
 ```
 
-### Step 3 — Google Login (OAuth) सेट कर
-1. https://console.cloud.google.com/apis/credentials वर जा (Google account ने)
-2. वरती **"Create Project"** (नवीन project नसेल तर) → नाव दे → Create
-3. **"Configure Consent Screen"** → User Type: **External** → App name, support email भर → Save
-4. डावीकडे **Credentials** → **Create Credentials** → **OAuth client ID**
-5. Application type: **Web application**
-6. **Authorized redirect URIs** मध्ये भर:
-   - Local: `http://localhost:3000/api/auth/callback/google`
-   - Vercel deploy केल्यावर (नंतर): `https://tumcha-project.vercel.app/api/auth/callback/google`
-7. Create दाबल्यावर **Client ID** आणि **Client Secret** मिळेल — ते कॉपी कर
-
-### Step 4 — Environment variables
+### Step 3 — Environment variables
 ```bash
 cp .env.example .env
 ```
-`.env` उघडून भर:
+Open `.env` and fill in:
 ```
 GEMINI_API_KEY=AIzaSy...
 DATABASE_URL="postgresql://user:password@host/dbname?sslmode=require"
-NEXTAUTH_SECRET=<terminal madhe run kar: openssl rand -base64 32>
-NEXTAUTH_URL=http://localhost:3000
-GOOGLE_CLIENT_ID=xxxx.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=xxxx
-NEXTAUTH_SECRET=कोणताही random लांब string (टर्मिनलमध्ये: openssl rand -base64 32)
+NEXTAUTH_SECRET=<generate with: openssl rand -base64 32>
 NEXTAUTH_URL=http://localhost:3000
 ```
 
-### Step 5 — Database तयार कर
+### Step 4 — Set up the database
 ```bash
 npx prisma db push
 ```
 
-> ⚠️ **schema.prisma मध्ये पुढेमागे बदल केलास (नवीन fields जोडलेस) तर प्रत्येक वेळी हा command परत चालवावा लागतो:**
+> ⚠️ **If you ever change `prisma/schema.prisma`** (e.g. add a new field), re-run this command to sync the change to your database:
 > ```bash
-> npx prisma migrate dev --name <describe-the-change>
+> npx prisma db push
 > ```
-> उदा. `npx prisma migrate dev --name add_grandparents_fields`
-> Production (Vercel/Neon) च्या DB वर हाच बदल पाठवायला:
-> ```bash
-> npx prisma migrate deploy
-> ```
-> (हे production चा `DATABASE_URL` वापरून चालवावं लागतं — local `.env` मध्ये temporarily production URL टाकून चालव, मग परत local URL ने बदल.)
+> For a production database (Vercel/Neon), point `DATABASE_URL` at it temporarily and run the same command, then switch back to your local URL.
 
-### Step 6 — Run
+### Step 5 — Run
 ```bash
 npm run dev
 ```
@@ -70,73 +51,75 @@ npm run dev
 
 ---
 
-## Vercel वर Deploy करणे
+## Deploying to Vercel
 
-### Step 1 — GitHub वर push कर
+### Step 1 — Push to GitHub
 ```bash
 git init
 git add .
 git commit -m "Initial SIR autofill app"
-```
-GitHub वर एक नवीन repository तयार कर, मग:
-```bash
-git remote add origin https://github.com/tumcha-username/sir-autofill.git
+git remote add origin https://github.com/your-username/sir-autofill.git
 git branch -M main
 git push -u origin main
 ```
 
-### Step 2 — Database तयार कर (Vercel Postgres)
-1. https://vercel.com वर account बनव (GitHub ने login करता येतो)
-2. Dashboard → **Storage** → **Create Database** → **Postgres** निवड
-3. Database तयार झाल्यावर तो तुमच्या project ला automatically जोडला जातो आणि `DATABASE_URL`, `POSTGRES_URL` इ. environment variables आपोआप set होतात
+### Step 2 — Create a production database
+1. Sign up at https://vercel.com (you can log in with GitHub)
+2. Dashboard → **Storage** → **Create Database** → **Postgres**
+3. Once created, it's linked to your project automatically and `DATABASE_URL` (and related env vars) get set for you
 
-   (पर्यायी: [Neon](https://neon.tech) किंवा [Supabase](https://supabase.com) चा free Postgres वापरून त्याची connection string manually Vercel च्या env variables मध्ये टाकू शकतोस)
+   (Alternatively, use a free [Neon](https://neon.tech) or [Supabase](https://supabase.com) Postgres and paste its connection string into Vercel's environment variables manually.)
 
-### Step 3 — Project Import कर
+### Step 3 — Import the project
 1. Vercel Dashboard → **Add New** → **Project**
-2. तुमचा GitHub repo निवड → **Import**
-3. **Environment Variables** मध्ये भर:
-   - `GEMINI_API_KEY` → तुमची Gemini key
-   - `DATABASE_URL` → (Vercel Postgres वापरत असशील तर आधीच auto-set असेल, नसेल तर Neon/Supabase ची connection string टाक)
-   - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` → Google Cloud Console मधले
-   - `NEXTAUTH_SECRET` → local प्रमाणेच random string (तोच वापर, वेगळा नको)
-   - `NEXTAUTH_URL` → तुमची deploy होणारी link, उदा. `https://sir-autofill.vercel.app`
-4. **Deploy** दाब
-5. Deploy झाल्यावर, Google Cloud Console → तुमच्या OAuth client मध्ये परत जाऊन **Authorized redirect URIs** मध्ये भर:
-   `https://tumcha-project.vercel.app/api/auth/callback/google`
-   (हे आधीच Step 3 मध्ये टाकलं नसेल तरच)
+2. Select your GitHub repo → **Import**
+3. Add these **Environment Variables**:
+   - `GEMINI_API_KEY` — your Gemini key
+   - `DATABASE_URL` — already set if using Vercel Postgres; otherwise your Neon/Supabase connection string
+   - `NEXTAUTH_SECRET` — the same random string you generated locally
+   - `NEXTAUTH_URL` — your deployed URL, e.g. `https://sir-autofill.vercel.app`
+4. Click **Deploy**
 
-### Step 4 — Database schema push कर (पहिल्यांदाच)
-Deploy झाल्यावर, तुमच्या local terminal मधून (production `DATABASE_URL` वापरून):
+### Step 4 — Push the database schema (first deploy only)
+After deploying, from your local terminal (temporarily pointing `.env`'s `DATABASE_URL` at the production database):
 ```bash
-npx prisma migrate deploy
+npx prisma db push
 ```
-किंवा Vercel च्या "Build Command" मध्ये आधीच `prisma generate && next build` सेट आहे (package.json मध्ये), पण tables तयार करण्यासाठी `migrate deploy` एकदा manually run करणं गरजेचं आहे — local `.env` मध्ये production चा `DATABASE_URL` टाकून वरचा command चालव, मग परत local URL ने बदल.
+This creates the tables on the production database. Switch `.env` back to your local `DATABASE_URL` afterward.
 
-Deploy झाल्यावर तुमची site अशा link वर live असेल: `https://tumcha-project.vercel.app`
+Your site will then be live at your Vercel URL, e.g. `https://sir-autofill.vercel.app`.
 
 ---
 
-## वापर कसा करायचा
+## How to Use
 
-1. **भाषा निवड** — वरच्या उजव्या कोपऱ्यात मराठी/हिंदी/English मधून निवड
-2. **फोटो** — पासपोर्ट साईज फोटो अपलोड कर (optional)
-3. **Documents** — एक-एक करून प्रत्येक document त्याच्या प्रकारासह अपलोड कर (कोणकोणती कागदपत्रे लागतील ते स्क्रीनवरच दाखवलेलं असतं), किंवा सर्व एकत्र स्कॅन केलेली एक PDF अपलोड कर
-4. **Verify** — auto-extract झालेले field (हिरवी border) तपासून घे, गरज असल्यास edit कर
-5. **Submit** — "Confirm & Save" दाबलं की माहिती database मध्ये save होते, त्यानंतर **"PDF डाउनलोड करा"** बटणाने भरलेल्या फॉर्मची PDF मिळते
+1. **Choose a language** — top-right corner: Marathi / Hindi / English
+2. **Photo** — upload a passport-size photo (optional)
+3. **Documents** — upload each document one by one with its type (the screen lists exactly which documents are needed), or upload one combined PDF with everything scanned together
+4. **Verify** — check the auto-extracted fields (green border), edit anything that needs correcting
+5. **Submit** — "Confirm & Save" stores the record in the database; then use **"Download PDF"** to get the filled form as a PDF
 
 ---
 
 ## Login System
 
-App ata **email + password login** cha use karto — pratek user la fakt swतःchya submissions dispayल.
+The app uses **email + password login** — each user only sees their own submissions.
 
-- `/signup` — navin khate tayar kara (naav, email, password)
-- `/login` — existing khात्याने login kara
-- Login zalyavर च `/` (main form) ani `/submissions` disतील — nahi tar automatically `/login` var redirect hoईल
-- Passwords `bcrypt` ने hash karून DB madhe save hotात (plain text nahi)
+- `/signup` — create a new account (name, email, password)
+- `/login` — log in to an existing account
+- `/` (the main form) and `/submissions` are only accessible when logged in — otherwise you're redirected to `/login`
+- Passwords are hashed with `bcrypt` before being stored (never saved as plain text)
 
-`NEXTAUTH_SECRET` production var **compulsory** ahe — Vercel var deploy karताna environment variable madhe add kar (`openssl rand -base64 32` ने generate kar).
+`NEXTAUTH_SECRET` is **required** in production — set it as an environment variable on Vercel (generate one with `openssl rand -base64 32`).
+
+---
+
+## Submissions Dashboard (`/submissions`)
+
+- **Search** by name or EPIC number
+- **Filter** by status (All / Draft / Submitted)
+- **Download PDF** for any saved submission
+- **Delete** — permanently removes the submission (and its documents) from the database; ownership is checked server-side, so you can only delete your own records
 
 ---
 
@@ -145,33 +128,40 @@ App ata **email + password login** cha use karto — pratek user la fakt swत�
 ```
 sir-autofill/
 ├── pages/
-│   ├── index.js              → मुख्य 4-step flow
-│   ├── submissions.js        → saved records बघायला
+│   ├── index.js                    → main 4-step flow
+│   ├── login.js, signup.js         → auth pages
+│   ├── submissions.js              → dashboard (search / filter / delete)
 │   └── api/
-│       ├── extract.js        → documents वाचून AI extraction (base64, no disk write)
-│       ├── upload-photo.js   → passport photo upload (base64)
-│       ├── submit.js         → final form DB मध्ये save
-│       ├── submissions.js    → saved records fetch
-│       └── generate-pdf.js   → भरलेल्या फॉर्मची PDF तयार करतो
+│       ├── auth/[...nextauth].js   → NextAuth config
+│       ├── auth/signup.js          → account creation
+│       ├── extract.js              → AI extraction from uploaded docs (base64, no disk write)
+│       ├── upload-photo.js         → passport photo upload (base64)
+│       ├── submit.js               → saves the final form to the database
+│       ├── submissions.js          → list the logged-in user's submissions
+│       ├── submissions/[id].js     → delete a submission
+│       └── generate-pdf.js         → generates the filled-form PDF
 ├── components/
 │   ├── Header.jsx, LanguageSwitcher.jsx, LangContext.jsx
 │   ├── PhotoUploadStep.jsx, DocumentUploadStep.jsx
 │   ├── VerifyStep.jsx, SubmitStep.jsx
+│   └── PasswordInput.jsx           → password field with show/hide toggle
 ├── lib/
-│   ├── gemini.js              → Gemini API extraction logic
-│   ├── i18n.js                → मराठी/हिंदी/English strings
-│   ├── documentTypes.js       → document types + form fields (त्रिभाषिक)
-│   └── prisma.js              → DB client
-├── prisma/schema.prisma       → Postgres schema (files base64 म्हणून DB मध्ये)
+│   ├── gemini.js                   → Gemini API extraction logic
+│   ├── auth.js                     → NextAuth credentials provider
+│   ├── i18n.js                     → Marathi / Hindi / English strings
+│   ├── documentTypes.js            → document types + form fields (trilingual)
+│   ├── compressImage.js            → client-side image compression before upload
+│   └── prisma.js                   → Prisma client singleton
+├── prisma/schema.prisma            → Postgres schema (files stored as base64)
+├── assets/fonts/                   → Devanagari-capable font used for PDF generation
 └── styles/globals.css
 ```
 
 ---
 
-## लक्षात ठेव
+## Notes
 
-- **"Timed out fetching a new connection from the connection pool" error आली तर:** एकाच वेळी अनेक `npm run dev` किंवा `npx prisma studio` processes चालू असतील तर Neon चा connection limit संपतो. सगळे जुने terminals/processes बंद करून फक्त एकच `npm run dev` चालव. `lib/prisma.js` आता connection pool आपोआप मर्यादित (5) करतो, त्यामुळे हे सहसा होणार नाही.
-
-- Uploaded documents आणि photo **base64 म्हणून थेट database मध्ये** save होतात — Vercel च्या serverless environment मध्ये disk persistent नसतो म्हणून
-- हे tool फक्त तुमचा वेळ वाचवण्यासाठी draft भरतं — प्रत्यक्ष ECI/SIR पोर्टलवर submit करण्यापूर्वी सर्व माहिती अधिकृत फॉर्मशी manually जुळवून बघ
-- Production साठी: auth (login) आणि document encryption जोडायचा विचार कर, कारण ID proofs sensitive असतात
+- **"Timed out fetching a new connection from the connection pool" error:** usually means multiple `npm run dev` or `npx prisma studio` processes are running at once and exhausting Neon's connection limit. Close all extra terminals/processes and run just one `npm run dev`. `lib/prisma.js` also caps the connection pool at 5 to help prevent this.
+- Uploaded documents and the passport photo are stored **as base64 directly in the database** — Vercel's serverless environment doesn't have a persistent filesystem.
+- This tool only fills a draft to save you time — always cross-check everything against the official form before submitting on the actual ECI/SIR portal.
+- For real production use, consider adding document encryption at rest, since ID proofs are sensitive.
